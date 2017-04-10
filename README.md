@@ -3,6 +3,8 @@
 
 A simple java 8 API to execute commands on minecraft servers remotely via the RCON protocol (see below).
 
+Tested against minecraft spigot 1.7.10 server - SUCCESS
+
 ## Usage
 1. Instantiate RConClient using one of the four constructors
 2. If you used one of the non-password constructors, call authenticate(password) to login.
