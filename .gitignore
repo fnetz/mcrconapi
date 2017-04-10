@@ -12,16 +12,11 @@ hs_err_pid*
 /target/
 
 .metadata
-bin/
 tmp/
 *.tmp
 *.bak
 *.swp
 *~.nib
-local.properties
 .settings/
-.loadpath
-.recommender
-
-# Code Recommenders
-.recommenders/
+.classpath
+.project
