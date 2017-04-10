@@ -132,7 +132,7 @@ public class RConClient implements Closeable {
 		Packet loginResponse = Packet.readFrom(inputStream);
 		if (loginResponse.getType() != Packet.TYPE_AUTH_RESPONSE)
 			throw new InvalidPacketException(
-					"Packet type should be TYPE_AUTH_RESPONSE (" + Packet.TYPE_AUTH_RESPONSE + ")");
+					"Packet type should be TYPE_AUTH_RESPONSE (" + Packet.TYPE_AUTH_RESPONSE + ")", loginResponse);
 		if (loginResponse.getRequestID() == loginPacket.getRequestID())
 			authenticated = true;
 		else if (loginResponse.getRequestID() == Packet.REQUEST_ID_AUTH_FAIL)
@@ -146,6 +146,25 @@ public class RConClient implements Closeable {
 	 */
 	public boolean isAuthenticated() {
 		return authenticated;
+	}
+
+	public String sendCommand(String command) throws AuthenticationException, IOException {
+		if (!authenticated)
+			throw new AuthenticationException("Not yet authenticated", ErrorType.NOT_AUTHENTICATED);
+		Packet commandPacket = new Packet(Packet.TYPE_COMMAND, command);
+		commandPacket.writeTo(outputStream);
+		StringBuilder builder = new StringBuilder();
+		Packet lastPacket;
+		while ((lastPacket = Packet.readFrom(inputStream)).getLength() == 4096) {
+			if (lastPacket.getType() != Packet.TYPE_COMMAND_RESPONSE)
+				throw new InvalidPacketException("Received packet of invalid type " + lastPacket.getType(), lastPacket);
+			builder.append(lastPacket.getPayloadAsString());
+		}
+		if (lastPacket.getLength() == 10)
+			throw new InvalidPacketException("Packet payload empty (this could mean an invalid command)", lastPacket);
+		else
+			builder.append(lastPacket.getPayloadAsString());
+		return builder.toString();
 	}
 
 	/**

@@ -126,7 +126,7 @@ public class Packet {
 	}
 
 	/**
-	 * <table border="1">
+	 * <table border="1" summary="Packet IDs">
 	 * <tr>
 	 * <th>Packet ID</th>
 	 * <th>Name</th>
@@ -135,10 +135,9 @@ public class Packet {
 	 * <tr>
 	 * <td>3</td>
 	 * <td>Login</td>
-	 * <td>Outgoing payload: password. <br/>
-	 * If the server returns a packet with the same request ID, auth was
-	 * successful (note: packet type is 2, not 3). If you get a request ID of
-	 * -1, auth failed (wrong password).</td>
+	 * <td>Outgoing payload: password. If the server returns a packet with the
+	 * same request ID, auth was successful (note: packet type is 2, not 3). If
+	 * you get a request ID of -1, auth failed (wrong password).</td>
 	 * </tr>
 	 * <tr>
 	 * <td>2</td>
@@ -155,11 +154,11 @@ public class Packet {
 	 * <td>0</td>
 	 * <td>Command response</td>
 	 * <td>Incoming payload is the output of the command, though many commands
-	 * return nothing, and there's no way of detecting unknown commands. <br/>
-	 * The output of the command may be split over multiple packets, each
-	 * containing 4096 bytes (less for the last packet). Each packet contains
-	 * part of the payload (and the two-byte padding). The last packet sent is
-	 * the end of the output.</td>
+	 * return nothing, and there's no way of detecting unknown commands. The
+	 * output of the command may be split over multiple packets, each containing
+	 * 4096 bytes (less for the last packet). Each packet contains part of the
+	 * payload (and the two-byte padding). The last packet sent is the end of
+	 * the output.</td>
 	 * </tr>
 	 * </table>
 	 * 
@@ -223,6 +222,7 @@ public class Packet {
 	 * @param outputStream
 	 *            the {@link DataOutputStream} to write the {@link Packet} to
 	 * @throws IOException
+	 *             if an I/O error occurs at the DataOutputStream
 	 */
 	public void writeTo(DataOutputStream outputStream) throws IOException {
 		outputStream.writeInt(length);

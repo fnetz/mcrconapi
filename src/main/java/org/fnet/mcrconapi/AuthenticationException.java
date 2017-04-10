@@ -6,7 +6,7 @@ public class AuthenticationException extends Exception {
 	private ErrorType type;
 
 	public enum ErrorType {
-		WRONG_PASSWORD, ALREADY_AUTHENTICATED
+		WRONG_PASSWORD, ALREADY_AUTHENTICATED, NOT_AUTHENTICATED
 	}
 
 	public AuthenticationException(String message, ErrorType type) {
