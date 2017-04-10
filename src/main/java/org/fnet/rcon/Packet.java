@@ -24,6 +24,7 @@
 package org.fnet.rcon;
 
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -195,9 +196,15 @@ public class Packet {
 	 * @see <a href="http://wiki.vg/RCON">http://wiki.vg/RCON</a>
 	 * @param outputStream
 	 *            the {@link DataOutputStream} to write the {@link Packet} to
+	 * @throws IOException
 	 */
-	public void writeTo(DataOutputStream outputStream) {
-
+	public void writeTo(DataOutputStream outputStream) throws IOException {
+		outputStream.writeInt(length);
+		outputStream.writeInt(requestID);
+		outputStream.writeInt(type);
+		outputStream.write(payload);
+		outputStream.writeByte(0);
+		outputStream.writeByte(0);
 	}
 
 }

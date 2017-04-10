@@ -25,6 +25,10 @@ package mcrconapi;
 
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import org.fnet.rcon.Packet;
 import org.junit.Test;
 
@@ -52,6 +56,27 @@ public class PacketTest {
 	public void testGetPayload() {
 		Packet packet = new Packet(0, "Test");
 		assertArrayEquals(new byte[] { 84 /* T */, 101 /* e */, 115 /* s */, 116 /* t */ }, packet.getPayload());
+	}
+
+	@Test
+	public void testWriteTo() throws IOException {
+		Packet packet = new Packet(3, "Test");
+		// Set the request id so we don't have to get the current requestId
+		// counter value with reflections
+		packet.setRequestID(1);
+		try (ByteArrayOutputStream arrayStream = new ByteArrayOutputStream(packet.getLength());
+				DataOutputStream dataStream = new DataOutputStream(arrayStream)) {
+			packet.writeTo(dataStream);
+			assertArrayEquals(new byte[] { 0, 0, 0, 14, 0, 0, 0, 1, 0, 0, 0, 3, 84, 101, 115, 116, 0, 0 },
+					arrayStream.toByteArray());
+		}
+	}
+	
+	@Test
+	public void testAsciiEncoding() {
+		Packet packet = new Packet(0, "üa");
+		assertNotEquals('ü', packet.getPayloadAsString().charAt(0));
+		assertEquals('a', packet.getPayloadAsString().charAt(1));
 	}
 
 }
