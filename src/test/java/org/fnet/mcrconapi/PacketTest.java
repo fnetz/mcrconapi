@@ -66,10 +66,9 @@ public class PacketTest {
 		// Set the request id so we don't have to get the current requestId
 		// counter value with reflections
 		packet.setRequestID(1);
-		try (ByteArrayOutputStream arrayStream = new ByteArrayOutputStream(packet.getLength());
-				DataOutputStream dataStream = new DataOutputStream(arrayStream)) {
-			packet.writeTo(dataStream);
-			assertArrayEquals(new byte[] { 0, 0, 0, 14, 0, 0, 0, 1, 0, 0, 0, 3, 84, 101, 115, 116, 0, 0 },
+		try (ByteArrayOutputStream arrayStream = new ByteArrayOutputStream(packet.getLength())) {
+			packet.writeTo(arrayStream);
+			assertArrayEquals(new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 },
 					arrayStream.toByteArray());
 		}
 	}
@@ -83,7 +82,7 @@ public class PacketTest {
 		try (ByteArrayOutputStream arrayStream = new ByteArrayOutputStream(packet.getLength());
 				DataOutputStream dataStream = new DataOutputStream(arrayStream)) {
 			packet.writeTo(dataStream);
-			assertArrayEquals(new byte[] { 0, 0, 0, 10, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0 },
+			assertArrayEquals(new byte[] { 10, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 0, 0 },
 					arrayStream.toByteArray());
 		}
 	}
@@ -97,7 +96,7 @@ public class PacketTest {
 
 	@Test
 	public void testReadFrom() throws IOException {
-		byte[] packetData = new byte[] { 0, 0, 0, 14, 0, 0, 0, 1, 0, 0, 0, 3, 84, 101, 115, 116, 0, 0 };
+		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
 			Packet packet = Packet.readFrom(dataStream);
@@ -110,7 +109,7 @@ public class PacketTest {
 
 	@Test(expected = MalformedPacketException.class)
 	public void testReadFromThrowsExceptionOnWrongType() throws IOException {
-		byte[] packetData = new byte[] { 0, 0, 0, 14, 0, 0, 0, 1, 0, 0, 0, 4, 84, 101, 115, 116, 0, 0 };
+		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
 			Packet.readFrom(dataStream);
@@ -119,7 +118,7 @@ public class PacketTest {
 	
 	@Test(expected = MalformedPacketException.class)
 	public void testReadFromThrowsExceptionIfLengthTooShort() throws IOException {
-		byte[] packetData = new byte[] { 0, 0, 0, 13, 0, 0, 0, 1, 0, 0, 0, 3, 84, 101, 115, 116, 0, 0 };
+		byte[] packetData = new byte[] { 13, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
 			Packet.readFrom(dataStream);
@@ -128,7 +127,7 @@ public class PacketTest {
 
 	@Test(expected = MalformedPacketException.class)
 	public void testReadFromThrowsExceptionIfLengthTooShort2() throws IOException {
-		byte[] packetData = new byte[] { 0, 0, 0, 9, 0, 0, 0, 1, 0, 0, 0, 3, 84, 101, 115, 116, 0, 0 };
+		byte[] packetData = new byte[] { 9, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
 			Packet.readFrom(dataStream);
@@ -137,7 +136,7 @@ public class PacketTest {
 	
 	@Test(expected = IOException.class)
 	public void testReadFromThrowsExceptionIfLengthTooLong() throws IOException {
-		byte[] packetData = new byte[] { 0, 0, 0, 15, 0, 0, 0, 1, 0, 0, 0, 3, 84, 101, 115, 116, 0, 0 };
+		byte[] packetData = new byte[] { 15, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
 			Packet.readFrom(dataStream);

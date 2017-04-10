@@ -23,9 +23,13 @@
  *******************************************************************************/
 package org.fnet.mcrconapi;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -40,7 +44,7 @@ public class Packet {
 
 	private static final Charset PAYLOAD_CHARSET = StandardCharsets.US_ASCII;
 
-	private static int packageIdCounter = 0;
+	private static int packageIdCounter = 1;
 
 	private int length;
 	private int requestID;
@@ -50,24 +54,31 @@ public class Packet {
 	private Packet() {
 	}
 
-	public static Packet readFrom(DataInputStream dataStream) throws IOException {
+	private static ByteBuffer getByteBuffer(InputStream stream, int length) throws IOException {
+		byte[] lengthBytes = new byte[length];
+		if (stream.read(lengthBytes) == -1)
+			throw new EOFException();
+		return ByteBuffer.wrap(lengthBytes).order(ByteOrder.LITTLE_ENDIAN);
+	}
+
+	public static Packet readFrom(InputStream dataStream) throws IOException {
 		Packet packet = new Packet();
-		packet.length = dataStream.readInt();
+		packet.length = getByteBuffer(dataStream, 4).getInt();
 		if (packet.length < 10)
 			throw new MalformedPacketException("Packet length lower than ten (minimum package size)");
-		packet.requestID = dataStream.readInt();
-		packet.type = dataStream.readInt();
+		packet.requestID = getByteBuffer(dataStream, 4).getInt();
+		packet.type = getByteBuffer(dataStream, 4).getInt();
 		if (packet.type != TYPE_LOGIN && packet.type != TYPE_AUTH_RESPONSE && packet.type != TYPE_COMMAND
 				&& packet.type != TYPE_COMMAND_RESPONSE)
 			throw new MalformedPacketException("Packet type is none of allowed packet types");
 		int payloadLength = packet.length - (Integer.BYTES * 2 + Byte.BYTES * 2);
 		packet.payload = new byte[payloadLength];
 		for (int i = 0; i < payloadLength; i++) {
-			packet.payload[i] = dataStream.readByte();
+			packet.payload[i] = (byte) dataStream.read();
 		}
-		if (dataStream.readByte() != 0)
+		if (dataStream.read() != 0)
 			throw new MalformedPacketException("Payload terminator byte not zero");
-		if (dataStream.readByte() != 0)
+		if (dataStream.read() != 0)
 			throw new MalformedPacketException("Packet terminator byte not zero");
 		return packet;
 	}
@@ -86,7 +97,7 @@ public class Packet {
 	 */
 	public Packet(int type, String payload) {
 		this.type = type;
-		this.requestID = packageIdCounter++;
+		this.requestID = packageIdCounter;
 		this.payload = payload.getBytes(PAYLOAD_CHARSET);
 		this.length = Integer.BYTES * 2 + this.payload.length + Byte.BYTES * 2;
 	}
@@ -224,13 +235,15 @@ public class Packet {
 	 * @throws IOException
 	 *             if an I/O error occurs at the DataOutputStream
 	 */
-	public void writeTo(DataOutputStream outputStream) throws IOException {
-		outputStream.writeInt(length);
-		outputStream.writeInt(requestID);
-		outputStream.writeInt(type);
-		outputStream.write(payload);
-		outputStream.writeByte(0);
-		outputStream.writeByte(0);
+	public void writeTo(OutputStream outputStream) throws IOException {
+		ByteBuffer buffer = ByteBuffer.allocate(this.length + 4).order(ByteOrder.LITTLE_ENDIAN);
+		buffer.putInt(length);
+		buffer.putInt(requestID);
+		buffer.putInt(type);
+		buffer.put(payload);
+		buffer.put((byte) 0);
+		buffer.put((byte) 0);
+		outputStream.write(buffer.array());
 	}
 
 }

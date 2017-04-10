@@ -8,7 +8,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +53,7 @@ public class RConClientTest {
 							break;
 						}
 					}
-				} catch (EOFException | SocketException e) {
+				} catch (EOFException e) {
 				} catch (IOException e) {
 					e.printStackTrace();
 				} finally {

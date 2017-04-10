@@ -27,6 +27,8 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 
 import org.fnet.mcrconapi.AuthenticationException.ErrorType;
@@ -36,8 +38,8 @@ public class RConClient implements Closeable {
 	public static final int DEFAULT_RCON_PORT = 25575;
 
 	private Socket socket;
-	private DataOutputStream outputStream;
-	private DataInputStream inputStream;
+	private OutputStream outputStream;
+	private InputStream inputStream;
 
 	private boolean authenticated;
 
