@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package org.fnet.rcon;
+package org.fnet.mcrconapi;
 
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -45,6 +46,31 @@ public class Packet {
 	private int requestID;
 	private int type;
 	private byte[] payload;
+
+	private Packet() {
+	}
+
+	public static Packet readFrom(DataInputStream dataStream) throws IOException {
+		Packet packet = new Packet();
+		packet.length = dataStream.readInt();
+		if (packet.length < 10)
+			throw new MalformedPacketException("Packet length lower than ten (minimum package size)");
+		packet.requestID = dataStream.readInt();
+		packet.type = dataStream.readInt();
+		if (packet.type != TYPE_LOGIN && packet.type != TYPE_AUTH_RESPONSE && packet.type != TYPE_COMMAND
+				&& packet.type != TYPE_COMMAND_RESPONSE)
+			throw new MalformedPacketException("Packet type is none of allowed packet types");
+		int payloadLength = packet.length - (Integer.BYTES * 2 + Byte.BYTES * 2);
+		packet.payload = new byte[payloadLength];
+		for (int i = 0; i < payloadLength; i++) {
+			packet.payload[i] = dataStream.readByte();
+		}
+		if (dataStream.readByte() != 0)
+			throw new MalformedPacketException("Payload terminator byte not zero");
+		if (dataStream.readByte() != 0)
+			throw new MalformedPacketException("Packet terminator byte not zero");
+		return packet;
+	}
 
 	/**
 	 * Generates a new packet with a type and a payload given. The length and
