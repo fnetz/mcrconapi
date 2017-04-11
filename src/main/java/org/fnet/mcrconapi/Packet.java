@@ -35,20 +35,15 @@ import java.nio.charset.StandardCharsets;
 
 public class Packet {
 
-	public static final int TYPE_LOGIN = 3;
-	public static final int TYPE_AUTH_RESPONSE = 2;
-	public static final int TYPE_COMMAND = 2;
-	public static final int TYPE_COMMAND_RESPONSE = 0;
-
 	public static final int REQUEST_ID_AUTH_FAIL = -1;
 
 	private static final Charset PAYLOAD_CHARSET = StandardCharsets.US_ASCII;
 
-	private static int packageIdCounter = 1;
+	private static int requestIdCounter = 1;
 
 	private int length;
 	private int requestID;
-	private int type;
+	private PacketType type;
 	private byte[] payload;
 
 	private Packet() {
@@ -61,16 +56,26 @@ public class Packet {
 		return ByteBuffer.wrap(lengthBytes).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	public static Packet readFrom(InputStream dataStream) throws IOException {
+	/**
+	 * Reads a package data from an {@link InputStream}
+	 * 
+	 * @param dataStream
+	 *            the {@link InputStream} to read from
+	 * @param clientside
+	 *            if the packet is a request
+	 * @return the resulting packet
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public static Packet readFrom(InputStream dataStream, boolean clientside) throws IOException {
 		Packet packet = new Packet();
 		packet.length = getByteBuffer(dataStream, 4).getInt();
 		if (packet.length < 10)
 			throw new MalformedPacketException("Packet length lower than ten (minimum package size)");
 		packet.requestID = getByteBuffer(dataStream, 4).getInt();
-		packet.type = getByteBuffer(dataStream, 4).getInt();
-		if (packet.type != TYPE_LOGIN && packet.type != TYPE_AUTH_RESPONSE && packet.type != TYPE_COMMAND
-				&& packet.type != TYPE_COMMAND_RESPONSE)
-			throw new MalformedPacketException("Packet type is none of allowed packet types");
+		packet.type = PacketType.fromID(getByteBuffer(dataStream, 4).getInt(), clientside);
+		if (packet.type == null)
+			throw new MalformedPacketException("Packet type is none of known packet types");
 		int payloadLength = packet.length - (Integer.BYTES * 2 + Byte.BYTES * 2);
 		packet.payload = new byte[payloadLength];
 		for (int i = 0; i < payloadLength; i++) {
@@ -95,9 +100,9 @@ public class Packet {
 	 * @see Packet#setType(int)
 	 * @see Packet#getRequestID()
 	 */
-	public Packet(int type, String payload) {
+	public Packet(PacketType type, String payload) {
 		this.type = type;
-		this.requestID = packageIdCounter;
+		this.requestID = requestIdCounter++;
 		this.payload = payload.getBytes(PAYLOAD_CHARSET);
 		this.length = Integer.BYTES * 2 + this.payload.length + Byte.BYTES * 2;
 	}
@@ -132,7 +137,7 @@ public class Packet {
 	 * @see Packet#setType(int)
 	 * @see <a href="http://wiki.vg/RCON">http://wiki.vg/RCON</a>
 	 */
-	public int getType() {
+	public PacketType getType() {
 		return type;
 	}
 
@@ -177,7 +182,7 @@ public class Packet {
 	 *            the {@link Packet}'s type
 	 * @see <a href="http://wiki.vg/RCON">http://wiki.vg/RCON</a>
 	 */
-	public void setType(int type) {
+	public void setType(PacketType type) {
 		this.type = type;
 	}
 
@@ -239,11 +244,17 @@ public class Packet {
 		ByteBuffer buffer = ByteBuffer.allocate(this.length + 4).order(ByteOrder.LITTLE_ENDIAN);
 		buffer.putInt(length);
 		buffer.putInt(requestID);
-		buffer.putInt(type);
+		buffer.putInt(type.getId());
 		buffer.put(payload);
 		buffer.put((byte) 0);
 		buffer.put((byte) 0);
 		outputStream.write(buffer.array());
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Packet[length=\"%s\",requestId=\"%s\",type=\"%s\" (id: %s), payload=\"%s\"]", length,
+				requestID, type, type.getId(), getPayloadAsString());
 	}
 
 }

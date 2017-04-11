@@ -129,12 +129,13 @@ public class RConClient implements Closeable {
 	public void authenticate(String password) throws IOException, AuthenticationException {
 		if (authenticated)
 			throw new AuthenticationException("Already authenticated", ErrorType.ALREADY_AUTHENTICATED);
-		Packet loginPacket = new Packet(Packet.TYPE_LOGIN, password);
+		Packet loginPacket = new Packet(PacketType.AUTH, password);
 		loginPacket.writeTo(outputStream);
-		Packet loginResponse = Packet.readFrom(inputStream);
-		if (loginResponse.getType() != Packet.TYPE_AUTH_RESPONSE)
+		Packet loginResponse = Packet.readFrom(inputStream, false);
+		if (loginResponse.getType() != PacketType.AUTH_RESPONSE)
 			throw new InvalidPacketException(
-					"Packet type should be TYPE_AUTH_RESPONSE (" + Packet.TYPE_AUTH_RESPONSE + ")", loginResponse);
+					"Packet type should be AUTH_RESPONSE (" + PacketType.AUTH_RESPONSE.getId() + ")",
+					loginResponse);
 		if (loginResponse.getRequestID() == loginPacket.getRequestID())
 			authenticated = true;
 		else if (loginResponse.getRequestID() == Packet.REQUEST_ID_AUTH_FAIL)
@@ -153,12 +154,12 @@ public class RConClient implements Closeable {
 	public String sendCommand(String command) throws AuthenticationException, IOException {
 		if (!authenticated)
 			throw new AuthenticationException("Not yet authenticated", ErrorType.NOT_AUTHENTICATED);
-		Packet commandPacket = new Packet(Packet.TYPE_COMMAND, command);
+		Packet commandPacket = new Packet(PacketType.COMMAND, command);
 		commandPacket.writeTo(outputStream);
 		StringBuilder builder = new StringBuilder();
 		Packet lastPacket;
-		while ((lastPacket = Packet.readFrom(inputStream)).getLength() == 4096) {
-			if (lastPacket.getType() != Packet.TYPE_COMMAND_RESPONSE)
+		while ((lastPacket = Packet.readFrom(inputStream, false)).getLength() == 4096) {
+			if (lastPacket.getType() != PacketType.COMMAND_RESPONSE)
 				throw new InvalidPacketException("Received packet of invalid type " + lastPacket.getType(), lastPacket);
 			builder.append(lastPacket.getPayloadAsString());
 		}

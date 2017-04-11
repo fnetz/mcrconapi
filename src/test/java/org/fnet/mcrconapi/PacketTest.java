@@ -43,28 +43,26 @@ public class PacketTest {
 
 	@Test
 	public void testGetLength() {
-		Packet packet = new Packet(0, "Test");
+		Packet packet = new Packet(PacketType.AUTH, "Test");
 		assertEquals(14, packet.getLength());
 	}
 
 	@Test
 	public void testGetLengthAfterPayloadChange() {
-		Packet packet = new Packet(0, "Test");
+		Packet packet = new Packet(PacketType.AUTH, "Test");
 		packet.setPayload("Teststring");
 		assertEquals(20, packet.getLength());
 	}
 
 	@Test
 	public void testGetPayload() {
-		Packet packet = new Packet(0, "Test");
+		Packet packet = new Packet(PacketType.AUTH, "Test");
 		assertArrayEquals(new byte[] { 84 /* T */, 101 /* e */, 115 /* s */, 116 /* t */ }, packet.getPayload());
 	}
 
 	@Test
 	public void testWriteTo() throws IOException {
-		Packet packet = new Packet(3, "Test");
-		// Set the request id so we don't have to get the current requestId
-		// counter value with reflections
+		Packet packet = new Packet(PacketType.AUTH, "Test");
 		packet.setRequestID(1);
 		try (ByteArrayOutputStream arrayStream = new ByteArrayOutputStream(packet.getLength())) {
 			packet.writeTo(arrayStream);
@@ -75,7 +73,7 @@ public class PacketTest {
 
 	@Test
 	public void testWriteToNoPayload() throws IOException {
-		Packet packet = new Packet(3, "");
+		Packet packet = new Packet(PacketType.AUTH, "");
 		// Set the request id so we don't have to get the current requestId
 		// counter value with reflections
 		packet.setRequestID(1);
@@ -89,20 +87,20 @@ public class PacketTest {
 
 	@Test
 	public void testAsciiEncoding() {
-		Packet packet = new Packet(0, "üa");
+		Packet packet = new Packet(PacketType.AUTH, "üa");
 		assertNotEquals('ü', packet.getPayloadAsString().charAt(0));
 		assertEquals('a', packet.getPayloadAsString().charAt(1));
 	}
 
 	@Test
 	public void testReadFrom() throws IOException {
-		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
+		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet packet = Packet.readFrom(dataStream);
+			Packet packet = Packet.readFrom(dataStream, false);
 			assertEquals(14, packet.getLength());
 			assertEquals(1, packet.getRequestID());
-			assertEquals(3, packet.getType());
+			assertEquals(PacketType.COMMAND_RESPONSE, packet.getType());
 			assertEquals("Test", packet.getPayloadAsString());
 		}
 	}
@@ -112,7 +110,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream);
+			Packet.readFrom(dataStream, false);
 		}
 	}
 	
@@ -121,7 +119,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 13, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream);
+			Packet.readFrom(dataStream, false);
 		}
 	}
 
@@ -130,7 +128,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 9, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream);
+			Packet.readFrom(dataStream, false);
 		}
 	}
 	
@@ -139,7 +137,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 15, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream);
+			Packet.readFrom(dataStream, false);
 		}
 	}
 
