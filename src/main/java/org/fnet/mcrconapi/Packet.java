@@ -33,6 +33,9 @@ import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * A RCON packet, either sent by the server or the client.
+ */
 public class Packet {
 
 	public static final int REQUEST_ID_AUTH_FAIL = -1;
@@ -97,7 +100,7 @@ public class Packet {
 	 *            the packet type
 	 * @param payload
 	 *            the payload
-	 * @see Packet#setType(int)
+	 * @see Packet#setType(PacketType)
 	 * @see Packet#getRequestID()
 	 */
 	public Packet(PacketType type, String payload) {
@@ -115,7 +118,7 @@ public class Packet {
 	 * 
 	 * @return the client-generated request ID or the previously set ID
 	 * @see Packet#setRequestID(int)
-	 * @see Packet#setType(int)
+	 * @see Packet#setType(PacketType)
 	 */
 	public int getRequestID() {
 		return requestID;
@@ -132,9 +135,10 @@ public class Packet {
 	}
 
 	/**
+	 * Returns the Packet's type as an enum.
 	 * 
 	 * @return the {@link Packet}'s type
-	 * @see Packet#setType(int)
+	 * @see Packet#setType(PacketType)
 	 * @see <a href="http://wiki.vg/RCON">http://wiki.vg/RCON</a>
 	 */
 	public PacketType getType() {
@@ -142,41 +146,7 @@ public class Packet {
 	}
 
 	/**
-	 * <table border="1" summary="Packet IDs">
-	 * <tr>
-	 * <th>Packet ID</th>
-	 * <th>Name</th>
-	 * <th>Description</th>
-	 * </tr>
-	 * <tr>
-	 * <td>3</td>
-	 * <td>Login</td>
-	 * <td>Outgoing payload: password. If the server returns a packet with the
-	 * same request ID, auth was successful (note: packet type is 2, not 3). If
-	 * you get a request ID of -1, auth failed (wrong password).</td>
-	 * </tr>
-	 * <tr>
-	 * <td>2</td>
-	 * <td>Command</td>
-	 * <td>Outgoing payload should be the command to run, e.g.
 	 * 
-	 * <pre>
-	 * time set 0
-	 * </pre>
-	 * 
-	 * </td>
-	 * </tr>
-	 * <tr>
-	 * <td>0</td>
-	 * <td>Command response</td>
-	 * <td>Incoming payload is the output of the command, though many commands
-	 * return nothing, and there's no way of detecting unknown commands. The
-	 * output of the command may be split over multiple packets, each containing
-	 * 4096 bytes (less for the last packet). Each packet contains part of the
-	 * payload (and the two-byte padding). The last packet sent is the end of
-	 * the output.</td>
-	 * </tr>
-	 * </table>
 	 * 
 	 * @param type
 	 *            the {@link Packet}'s type
@@ -187,6 +157,7 @@ public class Packet {
 	}
 
 	/**
+	 * Gets the raw payload that is an US_ASCII encoded string
 	 * 
 	 * @return the payload as {@code byte[]}
 	 */
@@ -195,8 +166,9 @@ public class Packet {
 	}
 
 	/**
+	 * Gets the payload as string
 	 * 
-	 * @return the payload as {@code String}
+	 * @return the payload as {@link String}
 	 */
 	public String getPayloadAsString() {
 		return new String(payload, PAYLOAD_CHARSET);
@@ -234,6 +206,9 @@ public class Packet {
 	}
 
 	/**
+	 * Writes the data of the packet in a raw format to the given
+	 * {@link OutputStream}
+	 * 
 	 * @see <a href="http://wiki.vg/RCON">http://wiki.vg/RCON</a>
 	 * @param outputStream
 	 *            the {@link DataOutputStream} to write the {@link Packet} to

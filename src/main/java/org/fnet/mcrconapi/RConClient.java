@@ -33,8 +33,15 @@ import java.net.Socket;
 
 import org.fnet.mcrconapi.AuthenticationException.ErrorType;
 
+/**
+ * A client that can connect to a RCON server, authenticate and then send
+ * minecraft commands.
+ */
 public class RConClient implements Closeable {
 
+	/**
+	 * The default port for RCON used by minecraft
+	 */
 	public static final int DEFAULT_RCON_PORT = 25575;
 
 	private Socket socket;
@@ -134,8 +141,7 @@ public class RConClient implements Closeable {
 		Packet loginResponse = Packet.readFrom(inputStream, false);
 		if (loginResponse.getType() != PacketType.AUTH_RESPONSE)
 			throw new InvalidPacketException(
-					"Packet type should be AUTH_RESPONSE (" + PacketType.AUTH_RESPONSE.getId() + ")",
-					loginResponse);
+					"Packet type should be AUTH_RESPONSE (" + PacketType.AUTH_RESPONSE.getId() + ")", loginResponse);
 		if (loginResponse.getRequestID() == loginPacket.getRequestID())
 			authenticated = true;
 		else if (loginResponse.getRequestID() == Packet.REQUEST_ID_AUTH_FAIL)
@@ -145,12 +151,28 @@ public class RConClient implements Closeable {
 	}
 
 	/**
+	 * Returns if the client is already authenticated, either by using
+	 * {@link RConClient#authenticate(String)} or one of the constructors that
+	 * calls {@link RConClient#authenticate(String)}
+	 * 
 	 * @return if the client is authenticated
 	 */
 	public boolean isAuthenticated() {
 		return authenticated;
 	}
 
+	/**
+	 * Sends a command to the remote server, waits for it to complete and
+	 * returns the output of the command
+	 * 
+	 * @param command
+	 *            the command to send
+	 * @return the output of the command
+	 * @throws AuthenticationException
+	 *             if you are not authenticated
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
 	public String sendCommand(String command) throws AuthenticationException, IOException {
 		if (!authenticated)
 			throw new AuthenticationException("Not yet authenticated", ErrorType.NOT_AUTHENTICATED);
