@@ -32,6 +32,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import org.fnet.mcrconapi.AuthenticationException.ErrorType;
+import org.fnet.mcrconapi.packet.ClientPacket;
+import org.fnet.mcrconapi.packet.Packet;
+import org.fnet.mcrconapi.packet.PacketType;
+import org.fnet.mcrconapi.packet.ServerPacket;
 
 /**
  * A client that can connect to a RCON server, authenticate and then send
@@ -136,9 +140,9 @@ public class RConClient implements Closeable {
 	public void authenticate(String password) throws IOException, AuthenticationException {
 		if (authenticated)
 			throw new AuthenticationException("Already authenticated", ErrorType.ALREADY_AUTHENTICATED);
-		Packet loginPacket = new Packet(PacketType.AUTH, password);
+		Packet loginPacket = new ClientPacket(PacketType.AUTH, password);
 		loginPacket.writeTo(outputStream);
-		Packet loginResponse = Packet.readFrom(inputStream, false);
+		Packet loginResponse = new ServerPacket(inputStream);
 		if (loginResponse.getType() != PacketType.AUTH_RESPONSE)
 			throw new InvalidPacketException(
 					"Packet type should be AUTH_RESPONSE (" + PacketType.AUTH_RESPONSE.getId() + ")", loginResponse);
@@ -176,11 +180,11 @@ public class RConClient implements Closeable {
 	public String sendCommand(String command) throws AuthenticationException, IOException {
 		if (!authenticated)
 			throw new AuthenticationException("Not yet authenticated", ErrorType.NOT_AUTHENTICATED);
-		Packet commandPacket = new Packet(PacketType.COMMAND, command);
+		Packet commandPacket = new ClientPacket(PacketType.COMMAND, command);
 		commandPacket.writeTo(outputStream);
 		StringBuilder builder = new StringBuilder();
 		Packet lastPacket;
-		while ((lastPacket = Packet.readFrom(inputStream, false)).getLength() == 4096) {
+		while ((lastPacket = new ServerPacket(inputStream)).getLength() == 4096) {
 			if (lastPacket.getType() != PacketType.COMMAND_RESPONSE)
 				throw new InvalidPacketException("Received packet of invalid type " + lastPacket.getType(), lastPacket);
 			builder.append(lastPacket.getPayloadAsString());

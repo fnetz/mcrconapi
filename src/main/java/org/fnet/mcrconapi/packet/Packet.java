@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *******************************************************************************/
-package org.fnet.mcrconapi;
+package org.fnet.mcrconapi.packet;
 
 import java.io.DataOutputStream;
 import java.io.EOFException;
@@ -36,7 +36,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * A RCON packet, either sent by the server or the client.
  */
-public class Packet {
+public abstract class Packet {
 
 	public static final int REQUEST_ID_AUTH_FAIL = -1;
 
@@ -44,52 +44,53 @@ public class Packet {
 
 	private static int requestIdCounter = 1;
 
-	private int length;
-	private int requestID;
-	private PacketType type;
-	private byte[] payload;
+	protected int length;
+	protected int requestID;
+	protected PacketType type;
+	protected byte[] payload;
 
-	private Packet() {
-	}
-
-	private static ByteBuffer getByteBuffer(InputStream stream, int length) throws IOException {
+	protected static ByteBuffer getByteBuffer(InputStream stream, int length) throws IOException {
 		byte[] lengthBytes = new byte[length];
 		if (stream.read(lengthBytes) == -1)
 			throw new EOFException();
 		return ByteBuffer.wrap(lengthBytes).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	/**
-	 * Reads a package data from an {@link InputStream}
-	 * 
-	 * @param dataStream
-	 *            the {@link InputStream} to read from
-	 * @param clientside
-	 *            if the packet is a request
-	 * @return the resulting packet
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 */
-	public static Packet readFrom(InputStream dataStream, boolean clientside) throws IOException {
-		Packet packet = new Packet();
-		packet.length = getByteBuffer(dataStream, 4).getInt();
-		if (packet.length < 10)
-			throw new MalformedPacketException("Packet length lower than ten (minimum package size)");
-		packet.requestID = getByteBuffer(dataStream, 4).getInt();
-		packet.type = PacketType.fromID(getByteBuffer(dataStream, 4).getInt(), clientside);
-		if (packet.type == null)
-			throw new MalformedPacketException("Packet type is none of known packet types");
-		int payloadLength = packet.length - (Integer.BYTES * 2 + Byte.BYTES * 2);
-		packet.payload = new byte[payloadLength];
-		for (int i = 0; i < payloadLength; i++) {
-			packet.payload[i] = (byte) dataStream.read();
-		}
-		if (dataStream.read() != 0)
-			throw new MalformedPacketException("Payload terminator byte not zero");
-		if (dataStream.read() != 0)
-			throw new MalformedPacketException("Packet terminator byte not zero");
-		return packet;
-	}
+	// /**
+	// * Reads a package data from an {@link InputStream}
+	// *
+	// * @param dataStream
+	// * the {@link InputStream} to read from
+	// * @param clientside
+	// * if the packet is a request
+	// * @return the resulting packet
+	// * @throws IOException
+	// * if an I/O error occurs
+	// */
+	// public static Packet readFrom(InputStream dataStream, boolean clientside)
+	// throws IOException {
+	// Packet packet = new Packet();
+	// packet.length = getByteBuffer(dataStream, 4).getInt();
+	// if (packet.length < 10)
+	// throw new MalformedPacketException("Packet length lower than ten (minimum
+	// package size)");
+	// packet.requestID = getByteBuffer(dataStream, 4).getInt();
+	// packet.type = PacketType.fromID(getByteBuffer(dataStream, 4).getInt(),
+	// clientside);
+	// if (packet.type == null)
+	// throw new MalformedPacketException("Packet type is none of known packet
+	// types");
+	// int payloadLength = packet.length - (Integer.BYTES * 2 + Byte.BYTES * 2);
+	// packet.payload = new byte[payloadLength];
+	// for (int i = 0; i < payloadLength; i++) {
+	// packet.payload[i] = (byte) dataStream.read();
+	// }
+	// if (dataStream.read() != 0)
+	// throw new MalformedPacketException("Payload terminator byte not zero");
+	// if (dataStream.read() != 0)
+	// throw new MalformedPacketException("Packet terminator byte not zero");
+	// return packet;
+	// }
 
 	/**
 	 * Generates a new packet with a type and a payload given. The length and
@@ -109,6 +110,23 @@ public class Packet {
 		this.payload = payload.getBytes(PAYLOAD_CHARSET);
 		this.length = Integer.BYTES * 2 + this.payload.length + Byte.BYTES * 2;
 	}
+
+	/**
+	 * Reads a package from an {@link InputStream}
+	 * 
+	 * @param dataStream
+	 *            the {@link InputStream} to read from
+	 * @param clientside
+	 *            if the packet is a request
+	 * @return the resulting packet
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 */
+	public Packet(InputStream stream) throws IOException {
+		readFrom(stream);
+	}
+
+	protected abstract void readFrom(InputStream stream) throws IOException;
 
 	/**
 	 * If not changed with {@link Packet#setRequestID(int)}, this returns a

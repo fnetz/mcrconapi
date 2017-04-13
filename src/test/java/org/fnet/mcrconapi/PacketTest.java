@@ -31,7 +31,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.fnet.mcrconapi.Packet;
+import org.fnet.mcrconapi.packet.ClientPacket;
+import org.fnet.mcrconapi.packet.Packet;
+import org.fnet.mcrconapi.packet.PacketType;
+import org.fnet.mcrconapi.packet.ServerPacket;
 import org.junit.Test;
 
 public class PacketTest {
@@ -43,26 +46,26 @@ public class PacketTest {
 
 	@Test
 	public void testGetLength() {
-		Packet packet = new Packet(PacketType.AUTH, "Test");
+		Packet packet = new ClientPacket(PacketType.AUTH, "Test");
 		assertEquals(14, packet.getLength());
 	}
 
 	@Test
 	public void testGetLengthAfterPayloadChange() {
-		Packet packet = new Packet(PacketType.AUTH, "Test");
+		Packet packet = new ClientPacket(PacketType.AUTH, "Test");
 		packet.setPayload("Teststring");
 		assertEquals(20, packet.getLength());
 	}
 
 	@Test
 	public void testGetPayload() {
-		Packet packet = new Packet(PacketType.AUTH, "Test");
+		Packet packet = new ClientPacket(PacketType.AUTH, "Test");
 		assertArrayEquals(new byte[] { 84 /* T */, 101 /* e */, 115 /* s */, 116 /* t */ }, packet.getPayload());
 	}
 
 	@Test
 	public void testWriteTo() throws IOException {
-		Packet packet = new Packet(PacketType.AUTH, "Test");
+		Packet packet = new ClientPacket(PacketType.AUTH, "Test");
 		packet.setRequestID(1);
 		try (ByteArrayOutputStream arrayStream = new ByteArrayOutputStream(packet.getLength())) {
 			packet.writeTo(arrayStream);
@@ -73,7 +76,7 @@ public class PacketTest {
 
 	@Test
 	public void testWriteToNoPayload() throws IOException {
-		Packet packet = new Packet(PacketType.AUTH, "");
+		Packet packet = new ClientPacket(PacketType.AUTH, "");
 		// Set the request id so we don't have to get the current requestId
 		// counter value with reflections
 		packet.setRequestID(1);
@@ -87,7 +90,7 @@ public class PacketTest {
 
 	@Test
 	public void testAsciiEncoding() {
-		Packet packet = new Packet(PacketType.AUTH, "üa");
+		Packet packet = new ClientPacket(PacketType.AUTH, "üa");
 		assertNotEquals('ü', packet.getPayloadAsString().charAt(0));
 		assertEquals('a', packet.getPayloadAsString().charAt(1));
 	}
@@ -97,7 +100,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet packet = Packet.readFrom(dataStream, false);
+			Packet packet = new ServerPacket(dataStream);
 			assertEquals(14, packet.getLength());
 			assertEquals(1, packet.getRequestID());
 			assertEquals(PacketType.COMMAND_RESPONSE, packet.getType());
@@ -110,7 +113,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 14, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream, false);
+			new ServerPacket(dataStream);
 		}
 	}
 	
@@ -119,7 +122,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 13, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream, false);
+			new ServerPacket(dataStream);
 		}
 	}
 
@@ -128,7 +131,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 9, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream, false);
+			new ServerPacket(dataStream);
 		}
 	}
 	
@@ -137,7 +140,7 @@ public class PacketTest {
 		byte[] packetData = new byte[] { 15, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 84, 101, 115, 116, 0, 0 };
 		try (ByteArrayInputStream inputStream = new ByteArrayInputStream(packetData);
 				DataInputStream dataStream = new DataInputStream(inputStream)) {
-			Packet.readFrom(dataStream, false);
+			new ServerPacket(dataStream);
 		}
 	}
 
