@@ -5,10 +5,12 @@ A simple java 8 API to execute commands on minecraft servers remotely via the RC
 
 Tested against minecraft spigot 1.7.10 server - SUCCESS
 
+Current version: v1.0.1
+
 ## Usage
 1. Instantiate RConClient using one of the four constructors
 2. If you used one of the non-password constructors, call authenticate(password) to login.
-3. Use sendCommand(command) to execute a command and get its output (TODO)
+3. Use sendCommand(command) to execute a command and get its output
 
 ## Contribute
 1. Clone the project using the link github provides
