@@ -5,7 +5,7 @@ A simple lightweight java 8 API to execute commands on minecraft servers remotel
 
 Tested against minecraft spigot 1.7.10 server - SUCCESS
 
-Current version: v1.1.0
+Current version: v1.1.1
 
 ## CLI Usage
     java -jar mcrconapi-1.1.0.jar

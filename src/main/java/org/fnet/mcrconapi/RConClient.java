@@ -51,7 +51,7 @@ public class RConClient implements Closeable {
 	/**
 	 * The API version
 	 */
-	public static final String API_VERSION = "1.1.0";
+	public static final String API_VERSION = "1.1.1";
 
 	private Socket socket;
 	private OutputStream outputStream;
