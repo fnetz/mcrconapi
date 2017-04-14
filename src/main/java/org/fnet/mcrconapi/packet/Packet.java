@@ -56,42 +56,6 @@ public abstract class Packet {
 		return ByteBuffer.wrap(lengthBytes).order(ByteOrder.LITTLE_ENDIAN);
 	}
 
-	// /**
-	// * Reads a package data from an {@link InputStream}
-	// *
-	// * @param dataStream
-	// * the {@link InputStream} to read from
-	// * @param clientside
-	// * if the packet is a request
-	// * @return the resulting packet
-	// * @throws IOException
-	// * if an I/O error occurs
-	// */
-	// public static Packet readFrom(InputStream dataStream, boolean clientside)
-	// throws IOException {
-	// Packet packet = new Packet();
-	// packet.length = getByteBuffer(dataStream, 4).getInt();
-	// if (packet.length < 10)
-	// throw new MalformedPacketException("Packet length lower than ten (minimum
-	// package size)");
-	// packet.requestID = getByteBuffer(dataStream, 4).getInt();
-	// packet.type = PacketType.fromID(getByteBuffer(dataStream, 4).getInt(),
-	// clientside);
-	// if (packet.type == null)
-	// throw new MalformedPacketException("Packet type is none of known packet
-	// types");
-	// int payloadLength = packet.length - (Integer.BYTES * 2 + Byte.BYTES * 2);
-	// packet.payload = new byte[payloadLength];
-	// for (int i = 0; i < payloadLength; i++) {
-	// packet.payload[i] = (byte) dataStream.read();
-	// }
-	// if (dataStream.read() != 0)
-	// throw new MalformedPacketException("Payload terminator byte not zero");
-	// if (dataStream.read() != 0)
-	// throw new MalformedPacketException("Packet terminator byte not zero");
-	// return packet;
-	// }
-
 	/**
 	 * Generates a new packet with a type and a payload given. The length and
 	 * requestID are automatically generated where the requestID is a value that
@@ -114,11 +78,8 @@ public abstract class Packet {
 	/**
 	 * Reads a package from an {@link InputStream}
 	 * 
-	 * @param dataStream
+	 * @param stream
 	 *            the {@link InputStream} to read from
-	 * @param clientside
-	 *            if the packet is a request
-	 * @return the resulting packet
 	 * @throws IOException
 	 *             if an I/O error occurs
 	 */
