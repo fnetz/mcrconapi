@@ -33,7 +33,7 @@ package org.fnet.mcrconapi;
 public class AuthenticationException extends Exception {
 
 	private static final long serialVersionUID = -7310707583704316944L;
-	private ErrorType type;
+	private final ErrorType type;
 
 	/**
 	 * The type of the authentication error

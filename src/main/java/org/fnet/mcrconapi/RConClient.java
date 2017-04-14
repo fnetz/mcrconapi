@@ -47,9 +47,9 @@ public class RConClient implements Closeable {
 	 * The default port for RCON used by minecraft
 	 */
 	public static final int DEFAULT_RCON_PORT = 25575;
-	
+
 	/**
-	 * 
+	 * The API version
 	 */
 	public static final String API_VERSION = "1.1.0";
 
@@ -189,13 +189,18 @@ public class RConClient implements Closeable {
 		commandPacket.writeTo(outputStream);
 		StringBuilder builder = new StringBuilder();
 		Packet lastPacket;
+		boolean repeated = false;
 		while ((lastPacket = new ServerPacket(inputStream)).getLength() == 4096) {
 			if (lastPacket.getType() != PacketType.COMMAND_RESPONSE)
 				throw new InvalidPacketException("Received packet of invalid type " + lastPacket.getType(), lastPacket);
 			builder.append(lastPacket.getPayloadAsString());
+			repeated = true;
 		}
 		if (lastPacket.getLength() == 10)
-			throw new InvalidPacketException("Packet payload empty (this could mean an invalid command)", lastPacket);
+			throw new InvalidPacketException(
+					"Packet payload of last packet empty "
+							+ (!repeated ? "(this could mean an invalid command)" : "(this could mean a server fault)"),
+					lastPacket);
 		else
 			builder.append(lastPacket.getPayloadAsString());
 		return builder.toString();

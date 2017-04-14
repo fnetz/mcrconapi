@@ -28,6 +28,9 @@ import java.io.InputStream;
 
 import org.fnet.mcrconapi.MalformedPacketException;
 
+/**
+ * A RCON packet sent by the client.
+ */
 public class ClientPacket extends Packet {
 
 	public ClientPacket(PacketType type, String payload) {

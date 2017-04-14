@@ -34,7 +34,7 @@ import org.fnet.mcrconapi.packet.Packet;
 public class InvalidPacketException extends IOException {
 
 	private static final long serialVersionUID = 7359011692721587596L;
-	private Packet invalidPacket;
+	private final Packet invalidPacket;
 
 	/**
 	 * Constructs a new InvalidPacketException, given a message and the invalid
