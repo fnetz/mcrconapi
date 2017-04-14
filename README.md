@@ -1,13 +1,30 @@
 # mcrconapi
 [![Build Status](https://travis-ci.org/fnetworks/mcrconapi.svg?branch=master)](https://travis-ci.org/fnetworks/mcrconapi)
 
-A simple java 8 API to execute commands on minecraft servers remotely via the RCON protocol (see below).
+A simple lightweight java 8 API to execute commands on minecraft servers remotely via the RCON protocol (see below).
 
 Tested against minecraft spigot 1.7.10 server - SUCCESS
 
 Current version: v1.1.0
 
-## Usage
+## CLI Usage
+    java -jar mcrconapi-1.1.0.jar
+Parameters:
+
+Long form | Short form | Arguments | Description
+------------ | ------------- | --------- | -----------
+--host | -a | address | Specify the host address
+--login | -l | password | Login at the server with the given password
+--help | -h | - | Show a help message
+--version | -v | - | Prints version information
+--noninteractive | -n | - | Non-Interactive mode (exit instead of asking for missing information and commands, default is interactive mode)
+--command | -c | command | Command that should be sent to the server (noninteractive mode)
+
+An example call would be `java -jar mcrconapi-1.1.0.jar --host 127.0.0.1 -l supersecret --command "say Hello World" -n`.
+
+Parameters can also be bundled, like `-nc "say Hello World"` for setting mode to non-interactive and specifying command at the same time. This works only for the short forms, and only the last parameter can have a value.
+
+## API Usage
 1. Instantiate RConClient using one of the four constructors
 2. If you used one of the non-password constructors, call authenticate(password) to login.
 3. Use sendCommand(command) to execute a command and get its output
