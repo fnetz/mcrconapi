@@ -36,7 +36,7 @@ import org.fnet.mcrconapi.packet.Packet;
 import org.fnet.mcrconapi.packet.PacketType;
 import org.fnet.mcrconapi.packet.ServerPacket;
 
-final class RConSingleClientTestServer implements Runnable, AutoCloseable {
+final class RConTestServer implements Runnable, AutoCloseable {
 
 	private final ServerSocket server;
 	private final Thread serverThread;
@@ -44,7 +44,7 @@ final class RConSingleClientTestServer implements Runnable, AutoCloseable {
 	private final List<Socket> clientSockets;
 	private final int port;
 
-	public RConSingleClientTestServer() throws IOException {
+	public RConTestServer() throws IOException {
 		serverThread = new Thread(this);
 		server = new ServerSocket();
 		server.bind(null);

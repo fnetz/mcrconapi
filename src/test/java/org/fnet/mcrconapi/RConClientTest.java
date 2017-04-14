@@ -39,7 +39,7 @@ public class RConClientTest {
 	static final String PASSWORD = "rbfH3x";
 	static final String SHORT_COMMAND_RESPONSE = "shortresponse";
 	static final String SHORT_COMMAND_REQUEST = "shortrequest";
-	private static RConSingleClientTestServer rConTestServer;
+	private static RConTestServer rConTestServer;
 	private static int rconPort;
 	
 	@Rule
@@ -47,7 +47,7 @@ public class RConClientTest {
 
 	@BeforeClass
 	public static void setUp() throws Exception {
-		rConTestServer = new RConSingleClientTestServer();
+		rConTestServer = new RConTestServer();
 		rConTestServer.start();
 		rconPort = rConTestServer.getPort();
 	}
