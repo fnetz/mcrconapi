@@ -32,8 +32,6 @@
 	<artifactId>mcrconapi</artifactId>
 	<version>1.0.1</version>
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		<junit.version>4.12</junit.version>
 	</properties>
 	<dependencies>
@@ -44,6 +42,29 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>org.fnet.mcrconapi.cli.CommandLineMain</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 	<scm>
 		<connection>scm:git:https://github.com/fnetworks/mcrconapi.git</connection>
 		<developerConnection>scm:git:https://github.com/fnetworks/mcrconapi.git</developerConnection>
