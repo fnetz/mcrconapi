@@ -1,14 +1,17 @@
 package org.fnet.mcrconapi.cli;
 
+import java.io.Console;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
+import org.fnet.mcrconapi.AuthenticationException;
 import org.fnet.mcrconapi.RConClient;
 
 public class CommandLineMain {
 
 	public static void main(String[] args) {
-		args = new String[] { "-h" };
 		Map<String, String> arguments = parseArguments(args);
 		if (arguments.containsKey("help") || arguments.containsKey("h")) {
 			printVersion();
@@ -17,6 +20,94 @@ public class CommandLineMain {
 		} else if (arguments.containsKey("version") || arguments.containsKey("-v")) {
 			printVersion();
 			return;
+		}
+		String host = arguments.containsKey("host") ? arguments.get("host") : arguments.get("a");
+		boolean interactive = !arguments.containsKey("noninteractive") && !arguments.containsKey("n");
+		String password = arguments.containsKey("login") ? arguments.get("login") : arguments.get("l");
+		String command = arguments.containsKey("command") ? arguments.get("command") : arguments.get("c");
+
+		try (Scanner sc = new Scanner(System.in)) {
+			if (host == null) {
+				if (interactive) {
+					System.out.println("Enter host address: ");
+					host = sc.nextLine();
+				} else {
+					System.err.println("Need host address");
+					System.exit(1);
+				}
+			}
+			if (password == null) {
+				if (interactive) {
+					System.out.println("Enter password: ");
+					Console console = System.console();
+					if (console != null) {
+						password = new String(console.readPassword());
+					} else {
+						password = sc.nextLine();
+					}
+				} else {
+					System.err.println("Need password");
+					System.exit(1);
+				}
+			}
+			if (command == null) {
+				if (interactive) {
+					System.out.println("Enter command to send: ");
+					command = sc.nextLine();
+				} else {
+					System.err.println("Need command");
+					System.exit(1);
+				}
+			}
+		}
+
+		RConClient client;
+		try {
+			client = new RConClient(host);
+		} catch (IOException e) {
+			System.err.println("An exception occured while connecting to the server: ");
+			e.printStackTrace(System.err);
+			System.exit(1);
+			return;
+		}
+		try {
+			client.authenticate(password);
+		} catch (IOException | AuthenticationException e) {
+			System.err.println("An exception occured while authenticating: ");
+			e.printStackTrace(System.err);
+			try {
+				client.close();
+			} catch (IOException ex) {
+				System.err.println("Additionaly, an exception occured while closing the client: ");
+				ex.printStackTrace(System.err);
+				System.exit(1);
+				return;
+			}
+			System.exit(1);
+			return;
+		}
+		try {
+			System.out.println(client.sendCommand(command));
+		} catch (AuthenticationException | IOException e) {
+			System.err.println("An exception occured while sending command: ");
+			e.printStackTrace(System.err);
+			try {
+				client.close();
+			} catch (IOException ex) {
+				System.err.println("Additionaly, an exception occured while closing the client: ");
+				ex.printStackTrace(System.err);
+				System.exit(1);
+				return;
+			}
+			System.exit(1);
+			return;
+		}
+		try {
+			client.close();
+		} catch (IOException e) {
+			System.err.println("An exception occured while closing the client: ");
+			e.printStackTrace(System.err);
+			System.exit(1);
 		}
 	}
 
@@ -70,8 +161,8 @@ public class CommandLineMain {
 		System.out.println("    --noninteractive | -n            : "
 				+ "Non-Interactive mode (exit instead of asking for missing information and commands, "
 				+ "default is interactive mode)");
-		System.out.println("    --commands       | -c <commands> : "
-				+ "Comma separated list of commands that should be sent to the server");
+		System.out.println("    --command       | -c <command> : "
+				+ "Command that should be sent to the server (noninteractive mode)");
 	}
 
 }
