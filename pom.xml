@@ -32,7 +32,7 @@
 	<artifactId>mcrconapi</artifactId>
 	<version>1.1.1</version>
 	<properties>
-		<junit.version>4.12</junit.version>
+		<junit.version>4.13.1</junit.version>
 	</properties>
 	<dependencies>
 		<dependency>
