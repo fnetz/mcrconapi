@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021 Felix Solcher
+ * Licensed under the terms of the MIT license.
+ */
 package org.fnet.mcrconapi;
 
 import java.util.Map;

@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2021 Felix Solcher
+ * Licensed under the terms of the MIT license.
+ */
 package org.fnet.mcrconapi.cli;
 
 import java.io.Console;
@@ -149,7 +153,7 @@ public class CommandLineMain {
 
 	public static void printVersion() {
 		System.out.println("MCRCONAPI v" + RConClient.API_VERSION);
-		System.out.println("Copyright (c) 2017 fnetworks");
+		System.out.println("Copyright (c) 2021 fnetworks");
 	}
 
 	public static void printUsage() {
