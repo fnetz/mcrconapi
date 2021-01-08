@@ -71,8 +71,8 @@ public class PacketTest {
 
 	@Test
 	public void testAsciiEncoding() {
-		Packet packet = new ClientPacket(PacketType.AUTH, "üa");
-		assertNotEquals('ü', packet.getPayloadAsString().charAt(0));
+		Packet packet = new ClientPacket(PacketType.AUTH, "Ã¼a");
+		assertNotEquals('Ã¼', packet.getPayloadAsString().charAt(0));
 		assertEquals('a', packet.getPayloadAsString().charAt(1));
 	}
 
